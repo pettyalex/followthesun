@@ -1,0 +1,30 @@
+{
+  "name": "followthesun",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@fitbit/sdk": "~4.1.0",
+    "@fitbit/sdk-cli": "^1.7.1"
+  },
+  "fitbit": {
+    "appUUID": "a0c79e02-aa10-4fcd-ba56-7c0aa8e76905",
+    "appType": "clockface",
+    "appDisplayName": "Followthesun",
+    "iconFile": "resources/icon.png",
+    "wipeColor": "#ffffff",
+    "requestedPermissions": [],
+    "buildTargets": [
+      "higgs",
+      "meson",
+      "gemini",
+      "mira"
+    ],
+    "i18n": {},
+    "defaultLanguage": "en-US"
+  },
+  "scripts": {
+    "build": "fitbit-build",
+    "debug": "fitbit"
+  }
+}
