@@ -1,3 +1,4 @@
-<svg>
-  <rect id="background" />
+<svg id="background">
+  <text id="time" />
+  <text id="timeuntilsunset" />
 </svg>
