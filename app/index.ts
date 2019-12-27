@@ -2,6 +2,7 @@ import clock from "clock";
 import document from "document";
 
 import { locationToSunTimes } from "./suncalc";
+import { getPosition } from "./location";
 
 console.log("hello world typescript");
 
@@ -10,6 +11,7 @@ clock.granularity = "seconds";
 const HOURS = 1000 * 60 * 60;
 const timeText = document.getElementById("time");
 const sunsetText = document.getElementById("timeuntilsunset");
+let cachedTime: null | Date;
 
 if (!timeText) {
   throw new Error("time text doesnt exist");
@@ -20,9 +22,21 @@ if (!sunsetText) {
 }
 
 clock.ontick = tick => {
+    cachedTime = tick.date;
+  // update clock && date
   timeText.text = `${tick.date.getHours()}:${tick.date.getMinutes()}`;
   //   console.log(`it's ${tick.date}`);
+  // update time to sunset
   sunsetText.text = formattedTimeUntilSunset(tick.date);
+};
+
+const updateSunset = () => {
+    const position = getPosition(updateSunset);
+    if (!position) {
+        return;
+    }
+
+    sunsetText.text = 
 };
 
 const timeUntilSunset = (time: Date) => {
