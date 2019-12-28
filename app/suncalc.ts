@@ -1,4 +1,5 @@
 import { SunTimes } from "./models";
+import * as suncalc from 'suncalc';
 
 export const locationToSunTimes = ({
   lat,
@@ -12,3 +13,13 @@ export const locationToSunTimes = ({
     sunset: new Date(new Date().setHours(19, 0, 0, 0))
   };
 };
+
+/*
+export const locationViaSunCalc  = ({
+    lat, 
+    long, 
+    date
+}) => {
+    suncalc.
+}
+*/

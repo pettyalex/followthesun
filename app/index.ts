@@ -30,14 +30,14 @@ clock.ontick = tick => {
   sunsetText.text = formattedTimeUntilSunset(tick.date);
 };
 
-const updateSunset = () => {
-    const position = getPosition(updateSunset);
-    if (!position) {
-        return;
-    }
+// const updateSunset = () => {
+//     const position = getPosition(updateSunset);
+//     if (!position) {
+//         return;
+//     }
 
-    sunsetText.text = 
-};
+//     sunsetText.text = 
+// };
 
 const timeUntilSunset = (time: Date) => {
   return (
