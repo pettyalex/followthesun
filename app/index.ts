@@ -1,7 +1,7 @@
 import clock from "clock";
 import document from "document";
 
-import { locationToSunTimes, getSunEventsForDate } from "./suncalc";
+import { getSunEventsForDate } from "./suncalc";
 import { getPosition } from "./location";
 import { formatSunString } from "./sunformatter";
 import times from "./times";
@@ -95,18 +95,4 @@ const updateSunset = async (sunsetText: Element, time: Date) => {
   cachedTimes.updatedAt = time;
 
   cachedTimes.currentlyUpdatingCache = false;
-};
-
-const timeUntilSunset = (time: Date) => {
-  return (
-    locationToSunTimes({ lat: 1, long: 1 }).sunset.valueOf() - time.valueOf()
-  );
-};
-
-const formattedTimeUntilSunset = (time: Date) => {
-  const msToSunset = timeUntilSunset(time);
-  // console.log(`seconds to sunset is ${msToSunset / 1000}`)
-  // console.log(`time is ${time}`)
-  // console.log(`sunset is ${locationToSunTimes({lat: 1, long: 1}).sunset}`)
-  return `${(msToSunset / 1000 / 60).toFixed()} minutes`;
 };
