@@ -6,7 +6,11 @@
   "devDependencies": {
     "@fitbit/sdk": "~4.1.0",
     "@fitbit/sdk-cli": "^1.7.1",
-    "fitbit-sdk-types": "^4.3.2"
+    "@types/jest": "^24.0.25",
+    "@types/node": "^13.1.1",
+    "fitbit-sdk-types": "^4.3.2",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.2.0"
   },
   "fitbit": {
     "appUUID": "a0c79e02-aa10-4fcd-ba56-7c0aa8e76905",
@@ -26,7 +30,8 @@
   },
   "scripts": {
     "build": "fitbit-build",
-    "debug": "fitbit"
+    "debug": "fitbit",
+    "test": "jest"
   },
   "dependencies": {
     "suncalc": "^1.8.0"
