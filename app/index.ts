@@ -1,78 +1,100 @@
 import clock from "clock";
 import document from "document";
 
-import { locationToSunTimes } from "./suncalc";
+import { locationToSunTimes, getSunEventsForDate } from "./suncalc";
 import { getPosition } from "./location";
 import { formatSunString } from "./sunformatter";
-import times from './times';
+import times from "./times";
 
 clock.granularity = "seconds";
 
-const timeText = document.getElementById("time");
-const sunsetText = document.getElementById("timeuntilsunset");
+const dateDisplay = document.getElementById("date")!;
+const timeText = document.getElementById("time")!;
+const sunsetText = document.getElementById("timeuntilsunset")!;
 
-if (!timeText) {
-  throw new Error("time text doesnt exist");
-}
-
-if (!sunsetText) {
-  throw new Error("sunset text doesnt exist");
-}
-
-let cachedTime: null | Date;
 // Global structure for caching sunrise & sunset
-let cachedTimes: {
-    sunset: null | Date,
-    sunrise: null | Date,
-    updatedAt: null | Date
-} = {
-    sunset: null,
-    sunrise: null,
-    updatedAt: null
-}
-const CACHE_MAX_TIME = 6 * times.HOURS;
+// Holds the next sunset & sunrise calculated. May be in the future or past when time rendering runs
+type TimeCache = {
+  sunset: Date;
+  sunrise: Date;
+  updatedAt: Date;
+  currentlyUpdatingCache: boolean;
+};
+
+let cachedTimes: Partial<TimeCache> = {};
+const CACHE_MAX_TIME = 3 * times.HOURS;
 
 clock.ontick = tick => {
   // update clock && date
-  timeText.text = `${tick.date.getHours()}:${tick.date.getMinutes()}`;
-  //   console.log(`it's ${tick.date}`);
-  // update time to sunset
+  dateDisplay.text = tick.date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  });
+  timeText.text = tick.date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  // Update time to sun event either from cache or by recalculating
   updateSunsetText(sunsetText, tick.date);
 };
 
-// Return true if we need to recacluate sunset time based on location
-const shouldUpdate = ({now, updatedAt}: {now: Date, updatedAt: Date | null}) => {
-    if (cachedTimes.sunrise === null || cachedTimes.sunset === null) {
-        return true;
-    }
-    if (updatedAt === null) {return true;}
-    if (now.valueOf() > (updatedAt.valueOf() + CACHE_MAX_TIME)) {
-        return true;
-    }
-
-
-    return false;
-
-}
-
 // Updates the text with either a cached sunset value, or a new calculated one that is stored in cache
 const updateSunsetText = (sunsetText: Element, time: Date) => {
-    if (shouldUpdate({now: time, updatedAt: cachedTimes.updatedAt})) {
-        updateSunset(sunsetText, time);
-    } else {
-        // Can safely update from cache
-        sunsetText.text = formatSunString({now: time, sunset: cachedTimes.sunset, sunrise: cachedTimes.sunrise})
+  if (shouldUpdate({ now: time })) {
+    updateSunset(sunsetText, time);
+  } else {
+    // Can safely update from cache
+    sunsetText.text = formatSunString({
+      now: time,
+      sunset: cachedTimes.sunset!,
+      sunrise: cachedTimes.sunrise!
+    });
+  }
+};
 
-    }
-}
+// Return true if we need to recacluate sunset time based on location
+const shouldUpdate = ({ now }: { now: Date }) => {
+  if (cachedTimes.currentlyUpdatingCache) {
+    return false;
+  }
 
-const updateSunset = (sunsetText: Element, time: Date) => {
-    const position = getPosition(updateSunset);
-    if (!position) {
-        return;
-    }
+  if (!cachedTimes.updatedAt || !cachedTimes.sunrise || !cachedTimes.sunset) {
+    return true;
+  }
 
-    sunsetText.text = 
+  if (now.valueOf() > cachedTimes.updatedAt.valueOf() + CACHE_MAX_TIME) {
+    return true;
+  }
+
+  return false;
+};
+
+// Writes to cache, lock the cache while we are updating it
+const updateSunset = async (sunsetText: Element, time: Date) => {
+  cachedTimes.currentlyUpdatingCache = true;
+
+  // Updating position could take a while.
+  // There could be a delay between time and when this returns
+  const position = await getPosition();
+  if (!position) {
+    // How could this have happened?!
+    return;
+  }
+
+  const { latitude, longitude } = position.coords;
+  const { sunrise, sunset } = getSunEventsForDate({
+    latitude,
+    longitude,
+    date: time
+  });
+
+  cachedTimes.sunrise = sunrise;
+  cachedTimes.sunset = sunset;
+  cachedTimes.updatedAt = time;
+
+  cachedTimes.currentlyUpdatingCache = false;
 };
 
 const timeUntilSunset = (time: Date) => {

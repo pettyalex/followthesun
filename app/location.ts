@@ -1,23 +1,15 @@
-import { geolocation } from "geolocation";
-
+import { geolocation, PositionError } from "geolocation";
 import times from "./times";
 
-let cachedPosition: Position | null = null;
-
-export const getPosition = (
-  updatePosition: (location: Position) => void
-) => () => {
-  if (cachedPosition) {
-    return cachedPosition;
-  }
-
-  // Register an event handler for when the position updates
-  geolocation.getCurrentPosition(
-    pos => {
-      cachedPosition = pos;
-      updatePosition(cachedPosition);
-    },
-    undefined,
-    { maximumAge: 6 * times.HOURS }
-  );
-};
+// No timeout is set, so this may take a very long time to resolve or reject
+export const getPosition = () =>
+  new Promise((resolve: (value: Position) => void, reject) => {
+    geolocation.getCurrentPosition(
+      (position: Position) => resolve(position),
+      (error: PositionError) => reject(error),
+      {
+        enableHighAccuracy: false,
+        maximumAge: 3 * times.HOURS
+      }
+    );
+  });
